@@ -29,11 +29,13 @@ export default class ColumnChart {
       return `<div style="--value: ${value}" data-tooltip="${percent}"></div>`;
     }).join('');
   }
-  
+  _getClassName(data) {
+    return this.data.length === 0 ? 'column-chart column-chart_loading' : 'column-chart';
+  }
   _getTemplate() {
-    const template = this.data.length === 0 ? 'column-chart_loading' : '';
+   
     return (`
-      <div class="column-chart ${template}" style="--chart-height: ${this.chartHeight}">
+      <div class="${this._getClassName(this.data)}" style="--chart-height: ${this.chartHeight}">
         <div class="column-chart__title">
            Total ${this.label}
           ${this._getLink()}
@@ -55,12 +57,17 @@ export default class ColumnChart {
     const element = document.createElement("div"); 
     element.innerHTML = this._getTemplate();
     this.element = element.firstElementChild;
+    this.elementColumns = this.element.querySelector('.column-chart__chart');
   }
 
   update(newData = []) {
-    this.remove();
     this.data = newData;
-    this.render();
+    this.elementColumns.innerHTML = this._getColumnProps(this.data);
+    if (!this.data.length) {
+      this.element.className = this._getClassName(this.data);
+    } else {
+      this.element.className = this._getClassName(this.data);
+    }
 
   }
 
@@ -70,6 +77,7 @@ export default class ColumnChart {
 
   remove() {
     this.element.remove();
+    this.elementColumns.remove();
   }
 
   destroy() {
