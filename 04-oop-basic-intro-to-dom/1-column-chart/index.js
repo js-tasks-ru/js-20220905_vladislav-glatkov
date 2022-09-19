@@ -1,4 +1,5 @@
 export default class ColumnChart {
+  
   chartHeight = 50;
   constructor({
     data = [],
@@ -54,9 +55,8 @@ export default class ColumnChart {
     const element = document.createElement("div"); 
     element.innerHTML = this._getTemplate();
     this.element = element.firstElementChild;
-    this.elementColumns = this.element.querySelector('.column-chart__chart');
   }
- 
+
   update(newData = []) {
     this.remove();
     this.data = newData;
