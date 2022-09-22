@@ -105,6 +105,8 @@ export default class SortableTable {
   }
   destroy() {
     this.remove();
+    this.fieldValue = '';
+    this.orderValue = '';
   }
 
 }
