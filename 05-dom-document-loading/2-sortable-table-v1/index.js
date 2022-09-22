@@ -34,12 +34,12 @@ export default class SortableTable {
       ` <a href="/products/${item.id}" class="sortable-table__row">
           ${this.getBodyItem(item)}
         </a>`
-    ).join("");
+    ).join('');
   }
   getBodyItem(item) {
     return this.headerConfig.map((data) => {
       return data.template ? data.template() : `<div class="sortable-table__cell">${item[data.id]}</div>`;  
-    }).join("");
+    }).join('');
   }
   getHeader() { 
     return this.headerConfig.map(
