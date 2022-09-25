@@ -1,12 +1,59 @@
 export default class SortableTable {
-  fieldValue='';
-  orderValue='';
-  constructor(headerConfig = [], data = []) {
+  isSortLocally = true;
+  fieldValue = '';
+  orderValue = '';
+
+  constructor(headerConfig = [], {data = [], sorted = {}} = {}) {
     this.headerConfig = headerConfig;
     this.data = [...data];
+    this.sorted = sorted;
+    this.fieldValue = sorted.id;
+    this.orderValue = sorted.order;
     this.render();
-
+    this.sort(this.fieldValue, this.orderValue);
   }
+  sort (fieldValue, orderValue) {
+    if (this.isSortLocally) {
+      this.sortOnClient(fieldValue, orderValue);
+    } else {
+      this.sortOnServer();
+    }
+  }
+  sortOnServer() {}
+  sortOnClient(fieldValue, orderValue) {
+    if (orderValue !== 'asc' && orderValue !== 'desc') {
+      console.error('Не правильные значния, проверь сортировку');
+      return; 
+    }
+    this.fieldValue = fieldValue;
+    this.orderValue = orderValue;
+    let direction = 1;
+    if (orderValue === 'desc') {
+      direction = -1;
+    }
+    this.data.sort((a, b)=> {
+      if (typeof a[fieldValue] === 'number') {
+        return direction * (a[fieldValue] - b[fieldValue]);
+      }
+      if (typeof a[fieldValue] === 'string') {
+        return direction * a[fieldValue].localeCompare(b[fieldValue], ['ru', 'en'], {caseFirst: 'upper'});
+      }  
+    });
+    this.update();
+  }
+  onClickSort = (e) => {
+    const target = e.target.closest(".sortable-table__cell");
+    if (target?.dataset?.sortable === "true") {
+      this.orderValue === "asc" ? this.orderValue = "desc" : this.orderValue = "asc";
+      this.sort(target.dataset.id, this.orderValue);
+    }
+  }
+  initEventListeners() {
+    document.addEventListener('pointerdown', this.onClickSort);
+  }
+  removeEventListeners = () => {
+    document.removeEventListener('pointerdown', this.onClickSort);
+  };
   getTemplate() {
     return `
     <div data-element="productsContainer" class="products-list__container">
@@ -63,6 +110,7 @@ export default class SortableTable {
     wrapper.innerHTML = this.getTemplate();
     this.element = wrapper.firstElementChild;
     this.subElements = this.getSubElements();
+    this.initEventListeners();
 
   }
   getSubElements() {
@@ -74,39 +122,18 @@ export default class SortableTable {
     }
     return subElements;
   }
-  sort(fieldValue, orderValue) {
-    
-    if (orderValue !== 'asc' && orderValue !== 'desc') {
-      console.error('Не правильные значния, проверь сортировку');
-      return; 
-    }
-    this.fieldValue = fieldValue;
-    this.orderValue = orderValue;
-    let direction = 1;
-    if (orderValue === 'desc') {
-      direction = -1;
-    }
-    this.data.sort((a, b)=> {
-      if (typeof a[fieldValue] === 'number') {
-        return direction * (a[fieldValue] - b[fieldValue]);
-      }
-      if (typeof a[fieldValue] === 'string') {
-        return direction * a[fieldValue].localeCompare(b[fieldValue], ['ru', 'en'], {caseFirst: 'upper'});
-      }  
-    });
-    this.update();
-  }
   update() {
     this.element.innerHTML = this.getTemplate();
     this.subElements = this.getSubElements();
-    
   }
   remove() {
     this.element?.remove();
+    this.removeEventListeners();
   }
   destroy() {
     this.remove();
+    this.fieldValue = '';
+    this.orderValue = '';
   }
 
 }
-
