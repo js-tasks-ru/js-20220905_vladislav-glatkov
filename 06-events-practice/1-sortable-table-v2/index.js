@@ -127,11 +127,11 @@ export default class SortableTable {
     this.subElements = this.getSubElements();
   }
   remove() {
-    this.element?.remove();
-    this.removeEventListeners();
+    this.element?.remove(); 
   }
   destroy() {
     this.remove();
+    this.removeEventListeners();
     this.fieldValue = '';
     this.orderValue = '';
   }

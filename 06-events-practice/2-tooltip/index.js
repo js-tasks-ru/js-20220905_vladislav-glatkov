@@ -52,7 +52,6 @@ class Tooltip {
     this.remove();
     this.removeEventListeners();
     Tooltip.tooltip = null;
-    this.element = null;
   }
 }
 
