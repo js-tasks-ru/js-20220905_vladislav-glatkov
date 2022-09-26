@@ -15,10 +15,10 @@ export default class ColumnChart {
   }
 
   
-  _getLink() {
+  getLink() {
     return this.link ? `<a href="${this.link}" class="column-chart__link">View all</a>` : '';
   }
-  _getColumnProps(data) {
+  getColumnProps(data) {
     const maxValue = Math.max(...data);
     const scale = this.chartHeight / maxValue;
 
@@ -29,23 +29,23 @@ export default class ColumnChart {
       return `<div style="--value: ${value}" data-tooltip="${percent}"></div>`;
     }).join('');
   }
-  _getClassName(data) {
+  getClassName(data) {
     return this.data.length === 0 ? 'column-chart column-chart_loading' : 'column-chart';
   }
-  _getTemplate() {
+  getTemplate() {
    
     return (`
-      <div class="${this._getClassName(this.data)}" style="--chart-height: ${this.chartHeight}">
+      <div class="${this.getClassName(this.data)}" style="--chart-height: ${this.chartHeight}">
         <div class="column-chart__title">
            Total ${this.label}
-          ${this._getLink()}
+          ${this.getLink()}
         </div>
         <div class="column-chart__container">
           <div data-element="header" class="column-chart__header">
             ${this.value}
           </div>
           <div data-element="body" class="column-chart__chart">
-          ${this._getColumnProps(this.data)}
+          ${this.getColumnProps(this.data)}
           </div>
         </div>
       </div>
@@ -55,18 +55,18 @@ export default class ColumnChart {
 
   render() {
     const element = document.createElement("div"); 
-    element.innerHTML = this._getTemplate();
+    element.innerHTML = this.getTemplate();
     this.element = element.firstElementChild;
     this.elementColumns = this.element.querySelector('.column-chart__chart');
   }
 
   update(newData = []) {
     this.data = newData;
-    this.elementColumns.innerHTML = this._getColumnProps(this.data);
+    this.elementColumns.innerHTML = this.getColumnProps(this.data);
     if (!this.data.length) {
-      this.element.className = this._getClassName(this.data);
+      this.element.className = this.getClassName(this.data);
     } else {
-      this.element.className = this._getClassName(this.data);
+      this.element.className = this.getClassName(this.data);
     }
 
   }

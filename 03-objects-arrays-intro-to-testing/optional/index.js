@@ -9,7 +9,7 @@ function returnTrue0(a) {
 function returnTrue1(a) {
   return typeof a !== 'object' && !Array.isArray(a) && a.length === 4;
 }
-//любые значения, кроме примитивных ({},[] и т.д), а также NaN
+//только NaN
 function returnTrue2(a) {
   return a !== a;
 }

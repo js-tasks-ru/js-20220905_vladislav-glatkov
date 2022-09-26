@@ -5,10 +5,10 @@
  */
 export function sum(a) {
 
-  let currentSum = a != undefined ? a : 0;
+  let currentSum = a !== undefined ? a : 0;
 
   function f(b) {
-    currentSum += b != undefined ? b : 0;
+    currentSum += b !== undefined ? b : 0;
     return f;
   }
 
