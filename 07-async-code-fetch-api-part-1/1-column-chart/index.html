@@ -36,7 +36,7 @@
 
       startInput.value = from.toISOString().split('T')[0];
       endInput.value = to.toISOString().split('T')[0];
-
+      
       const ordersChart = new ColumnChart({
         url: 'api/dashboard/orders',
         range: {
