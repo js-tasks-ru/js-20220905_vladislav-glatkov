@@ -12,6 +12,7 @@ export default class SortableTable {
     this.render();
     this.sort(this.fieldValue, this.orderValue);
   }
+
   sort (fieldValue, orderValue) {
     if (this.isSortLocally) {
       this.sortOnClient(fieldValue, orderValue);
@@ -20,6 +21,7 @@ export default class SortableTable {
     }
   }
   sortOnServer() {}
+
   sortOnClient(fieldValue, orderValue) {
     if (orderValue !== 'asc' && orderValue !== 'desc') {
       console.error('Не правильные значния, проверь сортировку');
@@ -41,19 +43,24 @@ export default class SortableTable {
     });
     this.update();
   }
+
   onClickSort = (e) => {
     const target = e.target.closest(".sortable-table__cell");
     if (target?.dataset?.sortable === "true") {
-      this.orderValue === "asc" ? this.orderValue = "desc" : this.orderValue = "asc";
+      const order = this.orderValue === "asc" ? "desc" : "asc";
+      this.orderValue = order;
       this.sort(target.dataset.id, this.orderValue);
     }
   }
+
   initEventListeners() {
     document.addEventListener('pointerdown', this.onClickSort);
   }
+
   removeEventListeners = () => {
     document.removeEventListener('pointerdown', this.onClickSort);
-  };
+  }
+
   getTemplate() {
     return `
     <div data-element="productsContainer" class="products-list__container">
@@ -76,6 +83,7 @@ export default class SortableTable {
     </div>
     `; 
   }
+
   getBody(data) {
     return data.map((item) =>
       ` <a href="/products/${item.id}" class="sortable-table__row">
@@ -83,11 +91,13 @@ export default class SortableTable {
         </a>`
     ).join('');
   }
+
   getBodyItem(item) {
     return this.headerConfig.map((data) => {
       return data.template ? data.template() : `<div class="sortable-table__cell">${item[data.id]}</div>`;  
     }).join('');
   }
+
   getHeader() { 
     return this.headerConfig.map(
       (item)=>
@@ -104,6 +114,7 @@ export default class SortableTable {
         </div>`
     ).join('');
   }
+
   render() {
     if (this.element) this.remove();
     const wrapper = document.createElement('div');
@@ -111,8 +122,8 @@ export default class SortableTable {
     this.element = wrapper.firstElementChild;
     this.subElements = this.getSubElements();
     this.initEventListeners();
-
   }
+
   getSubElements() {
     const subElements = {};
     const elements = this.element.querySelectorAll("[data-element]");
@@ -122,18 +133,20 @@ export default class SortableTable {
     }
     return subElements;
   }
+
   update() {
     this.element.innerHTML = this.getTemplate();
     this.subElements = this.getSubElements();
   }
+
   remove() {
     this.element?.remove(); 
   }
+
   destroy() {
     this.remove();
     this.removeEventListeners();
     this.fieldValue = '';
     this.orderValue = '';
   }
-
 }
