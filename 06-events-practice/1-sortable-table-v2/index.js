@@ -54,7 +54,7 @@ export default class SortableTable {
 
     if (target?.dataset?.sortable === "true") {
       const order = this.orderValue === "asc" ? "desc" : "asc";
-      this.orderValue = sort;
+      this.orderValue = order;
       this.sort(target.dataset.id, this.orderValue);
     }
   }
