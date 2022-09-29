@@ -12,7 +12,6 @@ export default class SortableTable {
     this.render();
     this.sort(this.fieldValue, this.orderValue);
   }
-
   sort (fieldValue, orderValue) {
     if (this.isSortLocally) {
       this.sortOnClient(fieldValue, orderValue);
@@ -20,23 +19,18 @@ export default class SortableTable {
       this.sortOnServer();
     }
   }
-
   sortOnServer() {}
-
   sortOnClient(fieldValue, orderValue) {
     if (orderValue !== 'asc' && orderValue !== 'desc') {
       console.error('Не правильные значния, проверь сортировку');
       return; 
     }
-
     this.fieldValue = fieldValue;
     this.orderValue = orderValue;
     let direction = 1;
-
     if (orderValue === 'desc') {
       direction = -1;
     }
-
     this.data.sort((a, b)=> {
       if (typeof a[fieldValue] === 'number') {
         return direction * (a[fieldValue] - b[fieldValue]);
@@ -45,28 +39,21 @@ export default class SortableTable {
         return direction * a[fieldValue].localeCompare(b[fieldValue], ['ru', 'en'], {caseFirst: 'upper'});
       }  
     });
-
     this.update();
   }
-
   onClickSort = (e) => {
     const target = e.target.closest(".sortable-table__cell");
-
     if (target?.dataset?.sortable === "true") {
-      const order = this.orderValue === "asc" ? "desc" : "asc";
-      this.orderValue = order;
+      this.orderValue === "asc" ? this.orderValue = "desc" : this.orderValue = "asc";
       this.sort(target.dataset.id, this.orderValue);
     }
   }
-
   initEventListeners() {
     document.addEventListener('pointerdown', this.onClickSort);
   }
-
   removeEventListeners = () => {
     document.removeEventListener('pointerdown', this.onClickSort);
   };
-
   getTemplate() {
     return `
     <div data-element="productsContainer" class="products-list__container">
@@ -89,7 +76,6 @@ export default class SortableTable {
     </div>
     `; 
   }
-
   getBody(data) {
     return data.map((item) =>
       ` <a href="/products/${item.id}" class="sortable-table__row">
@@ -97,13 +83,11 @@ export default class SortableTable {
         </a>`
     ).join('');
   }
-
   getBodyItem(item) {
     return this.headerConfig.map((data) => {
       return data.template ? data.template() : `<div class="sortable-table__cell">${item[data.id]}</div>`;  
     }).join('');
   }
-
   getHeader() { 
     return this.headerConfig.map(
       (item)=>
@@ -120,7 +104,6 @@ export default class SortableTable {
         </div>`
     ).join('');
   }
-
   render() {
     if (this.element) this.remove();
     const wrapper = document.createElement('div');
@@ -128,25 +111,21 @@ export default class SortableTable {
     this.element = wrapper.firstElementChild;
     this.subElements = this.getSubElements();
     this.initEventListeners();
-  }
 
+  }
   getSubElements() {
     const subElements = {};
     const elements = this.element.querySelectorAll("[data-element]");
-
     for (const subElement of elements) {
       const name = subElement.dataset.element;
       subElements[name] = subElement;
     }
-
     return subElements;
   }
-
   update() {
     this.element.innerHTML = this.getTemplate();
     this.subElements = this.getSubElements();
   }
-
   remove() {
     this.element?.remove(); 
   }
