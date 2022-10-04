@@ -35,26 +35,18 @@ export default class ColumnChart {
       const urlQueryString = new URL(this.url);
       urlQueryString.searchParams.set("from", this.from.toISOString());
       urlQueryString.searchParams.set("to", this.to.toISOString());
-
     
       await fetchJson(urlQueryString)
-        .then(data => {
+        .then((data) => {
           this.values = Object.values(data);
           this.data = data; 
-        })
-        .then(() => {
           if (this.values.length) {
-          this.element?.classList?.remove("column-chart_loading");
-          } 
-        })
-        .then(()=>this.renderColumnChart());   
-      //разделил на несколько then,  
-      //не знаю на сколько правильней будет писать все в один then, так какжется более читабельным 
+            this.element?.classList?.remove("column-chart_loading");
+          }
+          this.renderColumnChart();
+        });
+ 
       return this.data;
-      //также добавил async/await для прохождения тестов,
-      //если убрать async/await то код будет также корректно работать, но падают тесты
-      //не знаю на сколько корректно такую связку применять await f().then(()=>{}), ибо в учебнике
-      //async f(){const result = await func();} и только потом делается f().then
     }
   
     getLink() {
