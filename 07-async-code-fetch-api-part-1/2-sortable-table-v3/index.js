@@ -36,14 +36,6 @@ export default class SortableTable {
     return newUrl;
   }
 
-  async sort (fieldValue, orderValue) {
-    if (this.isSortLocally) {
-      this.sortOnClient(fieldValue, orderValue);
-    } else {
-      await this.sortOnServer(fieldValue, orderValue);
-    }
-  }
-
   async sortOnServer(fieldValue = 'title', orderValue = 'asc') {
     this.fieldValue = fieldValue;
     this.orderValue = orderValue;
@@ -92,8 +84,11 @@ export default class SortableTable {
     if (target?.dataset?.sortable === "true") {
       const order = this.orderValue === "asc" ? "desc" : "asc";
       this.orderValue = order;
-      this.sort(target.dataset.id, this.orderValue);
-      
+    }
+    if (this.isSortLocally) {
+      this.sortOnClient(target.dataset.id, this.orderValue);
+    } else {
+      this.sortOnServer(target.dataset.id, this.orderValue);
     }
     
   }
