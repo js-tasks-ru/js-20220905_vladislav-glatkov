@@ -1,5 +1,5 @@
 import fetchJson from './utils/fetch-json.js';
-//https://course-js.javascript.ru/api/dashboard/bestsellers?from=2022-08-30T10%3A03%3A38.749Z&to=2022-09-29T10%3A03%3A38.749Z&_sort=title&_order=asc&_start=0&_end=30
+
 const BACKEND_URL = 'https://course-js.javascript.ru';
 
 export default class SortableTable {
