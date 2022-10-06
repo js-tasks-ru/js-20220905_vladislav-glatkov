@@ -8,10 +8,14 @@ export default class SortableTable {
   loading = false;
   subElements = {};
   start = 0
-  step = 15
+  step = 20
   end = this.start + this.step;
 
-  constructor(headerConfig = [], {data = [], sorted = {}, url = '', isSortLocally = false} = {}) {
+  constructor(headerConfig = [], 
+    {data = [],
+      sorted = {orderValue: 'asc', fieldValue: headerConfig.find(item => item.sortable).id}, 
+      url = '', 
+      isSortLocally = false} = {}) {
     this.headerConfig = headerConfig;
     this.data = [...data];
     this.sorted = sorted;
@@ -21,10 +25,6 @@ export default class SortableTable {
     this.url = new URL(url, BACKEND_URL);
     this.render();
     
-  }
-  loadingData() {
-    const { table } = this.subElements;
-    return table.classList.contains("sortable-table_loading");
   }
 
   getUrl({fieldValue = "title", orderValue = "asc", start = this.start, end = this.end} = {}) {
@@ -80,7 +80,8 @@ export default class SortableTable {
 
     this.start = 0;
     this.end = this.start + this.step;
-    const target = e.target.closest('[data-sortable = "true"');
+    
+    const target = e.target.closest('[data-sortable = "true"]');
     if (target?.dataset?.sortable === "true") {
       const order = this.orderValue === "asc" ? "desc" : "asc";
       this.orderValue = order;
@@ -88,18 +89,18 @@ export default class SortableTable {
     if (this.isSortLocally) {
       this.sortOnClient(target.dataset.id, this.orderValue);
     } else {
-      this.sortOnServer(target.dataset.id, this.orderValue);
+      this.sortOnServer(target.dataset.id, this.orderValue); 
     }
     
   }
 
   initEventListeners() {
-    document.addEventListener('pointerdown', this.onClickSort);
-    document.addEventListener('scroll', this.dynamicScroll);
+    document.addEventListener('mousedown', this.onClickSort);
+    window.addEventListener('scroll', this.dynamicScroll);
   }
 
   removeEventListeners = () => {
-    document.removeEventListener('pointerdown', this.onClickSort);
+    document.addEventListener('mousedown', this.onClickSort);
     document.addEventListener('scroll', this.dynamicScroll);
   }
 
@@ -112,6 +113,7 @@ export default class SortableTable {
       this.end = this.start + this.step;
       const fetch = await this.fetchData({ start: this.start, end: this.end });
       this.data = [...this.data, ...fetch];
+      console.log(this.data);
       this.loading = false;
       this.update();
     }
@@ -158,7 +160,6 @@ export default class SortableTable {
     return this.headerConfig.map(
       (item)=>
         `<div class="sortable-table__cell"
-            onclick="${(e)=>this.sort(this.fieldValue, this.orderValue)}"
             data-id="${item.id}" 
             data-sortable="${item.sortable}" 
             data-order="${this.fieldValue === item.id ? this.orderValue : ""}"}
