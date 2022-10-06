@@ -71,7 +71,6 @@ export default class SortableList {
  
   wrapperDragging = (event) => {
     this.dragging(event);
-
   }
 
   dragging (event) {

@@ -21,8 +21,12 @@ export default class ProductForm {
     this.productId = productId;
   }
 
-  onSubmit = async (event) => {
+  submit = (event) => {
     event.preventDefault();
+    this.save();
+  }
+  
+  async save (event) {
     const data = this.getFormData();
 
     try {
@@ -51,7 +55,7 @@ export default class ProductForm {
 
       if (file) {
         const formData = new FormData();
-        const { uploadImage, imageContainer } = this.subElements;
+        const { uploadImage, imageListContainer } = this.subElements;
 
         formData.append('image', file);
 
@@ -67,7 +71,7 @@ export default class ProductForm {
           referrer: ''
         });
 
-        imageContainer.append(this.getImageItem(result.data.link, file.name));
+        imageListContainer.append(this.getImageItem(result.data.link, file.name));
 
         uploadImage.classList.remove('is-loading');
         uploadImage.disabled = false;
@@ -109,8 +113,8 @@ export default class ProductForm {
         </div>
         <div class="form-group form-group__wide">
           <label class="form-label">Фото</label>
-          <ul class="sortable-list" data-element="imageContainer">
-          <div data-element="imageContainer">
+          <ul class="sortable-list" data-element="imageListContainer">
+          <div data-element="imageListContainer">
             ${this.createImagesList()} 
           </div>
           </ul>
@@ -215,7 +219,7 @@ export default class ProductForm {
   }
 
   getFormData () {
-    const { productForm, imageContainer } = this.subElements;
+    const { productForm, imageListContainer } = this.subElements;
     const excludedFields = ['images'];
     const formatToNumber = ['price', 'quantity', 'discount', 'status'];
     const fields = Object.keys(this.defaultFormData).filter(item => !excludedFields.includes(item));
@@ -230,7 +234,7 @@ export default class ProductForm {
         : value;
     }
 
-    const imagesHTMLCollection = imageContainer.querySelectorAll('.sortable-table__cell-img');
+    const imagesHTMLCollection = imageListContainer.querySelectorAll('.sortable-table__cell-img');
 
     values.images = [];
     values.id = this.productId;
@@ -316,12 +320,12 @@ export default class ProductForm {
   }
 
   initEventListeners () {
-    const { productForm, uploadImage, imageContainer } = this.subElements;
+    const { productForm, uploadImage, imageListContainer } = this.subElements;
 
     productForm.addEventListener('submit', this.onSubmit);
     uploadImage.addEventListener('click', this.uploadImage);
 
-    imageContainer.addEventListener('click', event => {
+    imageListContainer.addEventListener('click', event => {
       if ('deleteHandle' in event.target.dataset) {
         event.target.closest('li').remove();
       }

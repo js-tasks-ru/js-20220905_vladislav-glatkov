@@ -22,8 +22,12 @@ export default class ProductForm {
     this.productId = productId;
   }
 
-  onSubmit = async (event) => {
+  submit = (event) => {
     event.preventDefault();
+    this.save();
+  }
+
+  async save() {
     const data = this.getFormData();
 
     try {
@@ -110,7 +114,7 @@ export default class ProductForm {
         </div>
         <div class="form-group form-group__wide">
           <label class="form-label">Фото</label>
-          <div data-element="imageContainer">
+          <div data-element="imageListContainer">
           </div>
           <button data-element="uploadImage" type="button" class="button-primary-outline">
             <span>Загрузить</span>
@@ -294,7 +298,7 @@ export default class ProductForm {
   }
 
   createImagesList () {
-    const { imageContainer } = this.subElements;
+    const { imageListContainer } = this.subElements;
     const { images } = this.formData;
 
     const items = images.map(({ url, source }) => this.getImageItem(url, source));
@@ -303,7 +307,7 @@ export default class ProductForm {
       items
     });
 
-    imageContainer.append(sortableList.element);
+    imageListContainer.append(sortableList.element);
   }
 
   getImageItem (url, name) {
@@ -325,12 +329,12 @@ export default class ProductForm {
   }
 
   initEventListeners () {
-    const { productForm, uploadImage, imageContainer } = this.subElements;
+    const { productForm, uploadImage, imageListContainer } = this.subElements;
 
-    productForm.addEventListener('submit', this.onSubmit);
+    productForm.addEventListener('submit', this.submit);
     uploadImage.addEventListener('click', this.uploadImage);
 
-    imageContainer.addEventListener('click', event => {
+    imageListContainer.addEventListener('click', event => {
       if ('deleteHandle' in event.target.dataset) {
         event.target.closest('li').remove();
       }

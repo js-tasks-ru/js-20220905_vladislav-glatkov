@@ -3,7 +3,6 @@ import fetchJson from './utils/fetch-json.js';
 const BACKEND_URL = 'https://course-js.javascript.ru';
 
 export default class SortableTable {
-  isSortLocally = false;
   fieldValue = '';
   orderValue = '';
   loading = false;
@@ -12,10 +11,11 @@ export default class SortableTable {
   step = 15
   end = this.start + this.step;
 
-  constructor(headerConfig = [], {data = [], sorted = {}, url = ''} = {}) {
+  constructor(headerConfig = [], {data = [], sorted = {}, url = '', isSortLocally = false} = {}) {
     this.headerConfig = headerConfig;
     this.data = [...data];
     this.sorted = sorted;
+    this.isSortLocally = isSortLocally;
     this.fieldValue = sorted.id;
     this.orderValue = sorted.order;
     this.url = new URL(url, BACKEND_URL);
@@ -85,6 +85,7 @@ export default class SortableTable {
   }
 
   onClickSort = (e) => {
+
     this.start = 0;
     this.end = this.start + this.step;
     const target = e.target.closest('[data-sortable = "true"');
@@ -92,7 +93,9 @@ export default class SortableTable {
       const order = this.orderValue === "asc" ? "desc" : "asc";
       this.orderValue = order;
       this.sort(target.dataset.id, this.orderValue);
+      
     }
+    
   }
 
   initEventListeners() {
@@ -104,6 +107,7 @@ export default class SortableTable {
     document.removeEventListener('pointerdown', this.onClickSort);
     document.addEventListener('scroll', this.dynamicScroll);
   }
+
   dynamicScroll = async () => {
     const {bottom} = this.element.getBoundingClientRect();
 
@@ -118,7 +122,6 @@ export default class SortableTable {
     }
   }
  
-
   getTemplate() {
     return `
     <div data-element="productsContainer" class="products-list__container">
@@ -188,9 +191,8 @@ export default class SortableTable {
       orderValue: this.orderValue,
       start: this.start,
       end: this.end,
-    })
+    });
     this.update();
-    
   }
 
   getSubElements() {
