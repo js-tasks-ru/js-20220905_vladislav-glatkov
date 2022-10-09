@@ -42,7 +42,7 @@ export default class ProductForm {
     } catch (error) {
       console.error('error', error);
     }
-  };
+  }
 
   uploadImage = () => {
     const fileInput = document.createElement('input');

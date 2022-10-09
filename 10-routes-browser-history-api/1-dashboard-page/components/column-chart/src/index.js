@@ -1,122 +1,137 @@
 import fetchJson from '../../../utils/fetch-json.js';
+//https://course-js.javascript.ru/api/dashboard/orders?from={}&to={}
 
 const BACKEND_URL = 'https://course-js.javascript.ru';
 
 export default class ColumnChart {
-  element;
-  subElements = {};
-  chartHeight = 50;
+    element;
+    chartHeight = 50;
+    data = [];
+    subElements = {};
+    values = [];
 
-  constructor({
-    label = '',
-    link = '',
-    formatHeading = data => data,
-    url = '',
-    range = {
-      from: new Date(),
-      to: new Date(),
+    constructor({
+      label = '',
+      link = '',
+      url = '',
+      range = {
+        from: new Date(),
+        to: new Date(),
+      },
+     
+      formatHeading = data => data} = {}) {
+      this.label = label;
+      this.link = link;
+      this.url = new URL(url, BACKEND_URL);
+      this.formatHeading = formatHeading;
+      this.from = range.from;
+      this.to = range.to;
+      this.render();
+      
     }
-  } = {}) {
-    this.url = new URL(url, BACKEND_URL);
-    this.range = range;
-    this.label = label;
-    this.link = link;
-    this.formatHeading = formatHeading;
 
-    this.render();
-  }
-
-  render() {
-    const { from, to } = this.range;
-    const element = document.createElement('div');
-
-    element.innerHTML = this.template;
-
-    this.element = element.firstElementChild;
-    this.subElements = this.getSubElements(this.element);
-
-    this.loadData(from, to);
-  }
-
-  getHeaderValue(data) {
-    return this.formatHeading(Object.values(data).reduce((accum, item) => (accum + item), 0));
-  }
-
-  async loadData(from, to) {
-    this.element.classList.add('column-chart_loading');
-    this.subElements.header.textContent = '';
-    this.subElements.body.innerHTML = '';
-
-    this.url.searchParams.set('from', from.toISOString());
-    this.url.searchParams.set('to', to.toISOString());
-
-    const data = await fetchJson(this.url);
-
-    this.setNewRange(from, to);
-
-    if (data && Object.values(data).length) {
-      this.subElements.header.textContent = this.getHeaderValue(data);
-      this.subElements.body.innerHTML = this.getColumnBody(data);
-
-      this.element.classList.remove('column-chart_loading');
+    async fetchColumnChart() {
+      this.element?.classList?.add("column-chart_loading");
+      const urlQueryString = new URL(this.url);
+      urlQueryString.searchParams.set("from", this.from.toISOString());
+      urlQueryString.searchParams.set("to", this.to.toISOString());
+    
+      await fetchJson(urlQueryString)
+        .then((data) => {
+          this.values = Object.values(data);
+          this.data = data; 
+          if (this.values.length) {
+            this.element?.classList?.remove("column-chart_loading");
+          }
+          this.renderColumnChart();
+        });
+ 
+      return this.data;
     }
-  }
-
-  setNewRange(from, to) {
-    this.range.from = from;
-    this.range.to = to;
-  }
-
-  getColumnBody(data) {
-    const maxValue = Math.max(...Object.values(data));
-
-    return Object.entries(data).map(([key, value]) => {
+  
+    getLink() {
+      return this.link ? `<a href="${this.link}" class="column-chart__link">View all</a>` : '';
+    }
+    
+    getColumnProps() {
+      const maxValue = Math.max(...this.values);
       const scale = this.chartHeight / maxValue;
-      const percent = (value / maxValue * 100).toFixed(0);
-      const tooltip = `<span>
-        <small>${key.toLocaleString('default', {dateStyle: 'medium'})}</small>
-        <br>
-        <strong>${percent}%</strong>
-      </span>`;
+  
+      return this.values.map(item => {
+        const percent = (item / maxValue * 100).toFixed(0) + '%';
+        const value = String(Math.floor(item * scale));
+  
+        return `<div style="--value: ${value}" data-tooltip="${percent}"></div>`;
+      }).join('');
+    }
 
-      return `<div style="--value: ${Math.floor(value * scale)}" data-tooltip="${tooltip}"></div>`;
-    }).join('');
-  }
+    getSubElements() {
+      const subElements = {};
+      const elements = this.element.querySelectorAll("[data-element]");
+  
+      for (const subElement of elements) {
+        const name = subElement.dataset.element;
+  
+        subElements[name] = subElement;
+      }
+      return subElements;
+    }
 
-  getLink() {
-    return this.link ? `<a class="column-chart__link" href="${this.link}">View all</a>` : '';
-  }
-
-  get template() {
-    return `
-      <div class="column-chart column-chart_loading" style="--chart-height: ${this.chartHeight}">
-        <div class="column-chart__title">
-          Total ${this.label}
-          ${this.getLink()}
-        </div>
-        <div class="column-chart__container">
-          <div data-element="header" class="column-chart__header"></div>
-          <div data-element="body" class="column-chart__chart"></div>
+    getTemplate() {
+     
+      return (`
+        <div class="column-chart column-chart_loading" style="--chart-height: ${this.chartHeight}">
+          <div class="column-chart__title">
+             Total ${this.label}
+            ${this.getLink()}
+          </div>
+          <div class="column-chart__container">
+            <div data-element="header" class="column-chart__header">
+              ${this.getHeader()}
+            </div>
+            <div data-element="body" class="column-chart__chart">
+            ${this.getColumnProps()}
+            </div>
+          </div>
         </div>
       </div>
-    `;
-  }
+      `);
+    }
 
-  getSubElements(element) {
-    const elements = element.querySelectorAll('[data-element]');
+    renderColumnChart() {
+      const { body, header } = this.subElements;
+      body.innerHTML = this.getColumnProps();
+      header.innerHTML = this.getHeader();
+    }
 
-    return [...elements].reduce((accum, subElement) => {
-      accum[subElement.dataset.element] = subElement;
+    getHeader() {
+      const headerValue = this.values.reduce(
+        (prev, curr) => (prev += parseInt(curr)),
+        0
+      );
+      return this.formatHeading(headerValue);
+    }
+  
+    render() {
+      const element = document.createElement("div"); 
+      element.innerHTML = this.getTemplate();
+      this.element = element.firstElementChild;
+      this.subElements = this.getSubElements();
+      this.fetchColumnChart();
+    }
+  
+    async update(from, to) {
+      this.from = from;
+      this.to = to;
+      this.data = await this.fetchColumnChart();
+      return this.data;
+    }
 
-      return accum;
-    }, {});
-  }
-
-  async update(from, to) {
-    return await this.loadData(from, to);
-  }
-
-  destroy() {
-    this.element.remove();
-  }
+    destroy() {
+      this.remove();
+    }
+  
+    remove() {
+      this.element?.remove();
+    }
 }

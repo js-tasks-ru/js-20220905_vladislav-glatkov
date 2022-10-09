@@ -130,7 +130,6 @@ export default class SortableTable {
       ${this.getBody(this.data)}
     </div>
     <div data-element="loading" class="loading-line sortable-table__loading-line"></div>
-
     <div data-element="emptyPlaceholder" class="sortable-table__empty-placeholder">
       <div>
         <p>No products satisfies your filter criteria</p>
