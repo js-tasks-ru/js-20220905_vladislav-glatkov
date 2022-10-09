@@ -58,6 +58,7 @@
   import Page from './index.js';
 
   const contentNode = document.querySelector('#content');
+  const loading = document.querySelector('.progress-bar');
 
   async function initialize () {
     const page = new Page();
@@ -65,8 +66,11 @@
 
     contentNode.innerHTML = '';
     contentNode.append(element);
+  
   }
 
   initialize();
+  
+  loading.remove()
 </script>
 </body>
