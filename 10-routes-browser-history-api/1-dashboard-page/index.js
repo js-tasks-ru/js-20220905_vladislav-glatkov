@@ -1,31 +1,24 @@
-import RangePicker from './components/range-picker/src/index.js';
-import SortableTable from './components/sortable-table/src/index.js';
-import ColumnChart from './components/column-chart/src/index.js';
-import header from './bestsellers-header.js';
+import RangePicker from "./components/range-picker/src/index.js";
+import SortableTable from "./components/sortable-table/src/index.js";
+import ColumnChart from "./components/column-chart/src/index.js";
+import header from "./bestsellers-header.js";
 
-import fetchJson from './utils/fetch-json.js';
+import fetchJson from "./utils/fetch-json.js";
 
-const BACKEND_URL = 'https://course-js.javascript.ru/';
+const BACKEND_URL = "https://course-js.javascript.ru/";
 
 export default class Page {
   element;
   subElements = {};
   components = {};
-  url = new URL('api/dashboard/bestsellers', BACKEND_URL);
-  now = new Date();
-  to = new Date();
-  from = new Date(this.now.setMonth(this.now.getMonth() - 1));
 
   async render() {
-    const wrapper = document.createElement('div');
+    const wrapper = document.createElement("div");
     wrapper.innerHTML = this.getTemplate();
     this.element = wrapper.firstElementChild;
-    this.subElements = this.getSubElements(); 
-    this.initRangePicker();
-    this.createOrdersChart();
-    this.createSalesChart();
-    this.createCustomersChart();
-    this.createSortableTable();
+    this.subElements = this.getSubElements();
+    await this.createComponents();
+    this.initComponents();
     this.initEventListeners();
     return this.element;
   }
@@ -68,99 +61,80 @@ export default class Page {
     `;
   }
 
-  initRangePicker() {
-    const { rangePicker } = this.subElements;
-    const from = this.from;
-    const to = this.to;
-    const picker = new RangePicker({
+  async createComponents() {
+    const now = new Date();
+    const to = new Date();
+    const from = new Date(now.setMonth(now.getMonth() - 1));
+    this.components.rangePicker = new RangePicker({
       from,
-      to
+      to,
     });
-    rangePicker.append(picker.element);
-    this.components.rangePicker = picker;
-  }
 
-  createOrdersChart() {
-    const { ordersChart } = this.subElements; 
-    const from = this.from;
-    const to = this.to;
-
-    const chart = new ColumnChart({
-      url: 'api/dashboard/orders',
+    this.components.ordersChart = new ColumnChart({
+      url: "api/dashboard/orders",
       range: {
         from,
-        to
+        to,
       },
-      label: 'orders',
-      link: '#'
-    }); 
+      label: "orders",
+      link: "#",
+    });
 
-    ordersChart.append(chart.element);
-    this.components.ordersChart = chart;
-  }
-
-  createSalesChart() {
-    const { salesChart } = this.subElements; 
-    const from = this.from;
-    const to = this.to;
-
-    const chart = new ColumnChart({
-      url: 'api/dashboard/sales',
+    this.components.salesChart = new ColumnChart({
+      url: "api/dashboard/sales",
       range: {
         from,
-        to
+        to,
       },
-      label: 'sales',
-      formatHeading: data => `$${data}`
-    }); 
+      formatHeading: (data) => `$${data}`,
+    });
 
-    salesChart.append(chart.element);
-    this.components.salesChart = chart;
-  }
-
-  createCustomersChart() {
-    const { customersChart } = this.subElements; 
-    const from = this.from;
-    const to = this.to;
-
-    const chart = new ColumnChart({
-      url: 'api/dashboard/customers',
+    this.components.customersChart = new ColumnChart({
+      url: "api/dashboard/orders",
       range: {
         from,
-        to
+        to,
       },
-      label: 'customers',
-    }); 
-
-    customersChart.append(chart.element);
-    this.components.customersChart = chart;
-  }
-
-  createSortableTable() {
-    const { sortableTable } = this.subElements; 
-
-    const chart = new SortableTable(header, {
-      url: `api/dashboard/bestsellers?from=${this.from.toISOString()}&to=${this.to.toISOString()}`,
-      isSortLocally: true
+      label: "orders",
+      link: "#",
     });
-    //если ставить isSortLocally: false то перестает сортировать на серверной части
-    
 
-    sortableTable.append(chart.element);
-    this.components.sortableTable = chart;
-  }
-
-  initEventListeners () {
-    this.components.rangePicker.element.addEventListener('date-select', event => {
-      const { from, to } = event.detail;
-
-      this.update(from, to);
+    this.components.sortableTable = new SortableTable(header, {
+      url: `api/dashboard/bestsellers?from=${from.toISOString()}&to=${to.toISOString()}`,
+      isSortLocally: true,
     });
   }
+
+  initComponents() {
+    Object.entries(this.components).forEach(([key, value]) => {
+      if (this.subElements[key]) {
+        this.subElements[key].append(value.element);
+      }
+    });
+  }
+
+  initEventListeners() {
+    this.components.rangePicker.element.addEventListener(
+      "date-select",
+      (event) => {
+        const { from, to } = event.detail;
+        this.update(from, to);
+      }
+    );
+    document.addEventListener("pointerdown", this.changeAsideMenu);
+  }
+
+  changeAsideMenu = (event) => {
+    const target = event.target.closest(".sidebar__toggler");
+    if (target) {
+      document.body.classList.toggle("is-collapsed-sidebar");
+    }
+  };
 
   async update(from, to) {
     const data = await this.fetchData(from, to);
-    const {sortableTable, ordersChart, salesChart, customersChart} = this.components;
+    const { sortableTable, ordersChart, salesChart, customersChart } =
+      this.components;
 
     sortableTable.update(data);
     ordersChart.update(from, to);
@@ -168,26 +142,23 @@ export default class Page {
     customersChart.update(from, to);
   }
 
-  fetchData (from, to) {
-    this.url.searchParams.set('_start', '1');
-    this.url.searchParams.set('_end', '21');
-    this.url.searchParams.set('_sort', 'title');
-    this.url.searchParams.set('_order', 'asc');
-    this.url.searchParams.set('from', from.toISOString());
-    this.url.searchParams.set('to', to.toISOString());
+  fetchData(from, to) {
+    const url = `${BACKEND_URL}api/dashboard/bestsellers?_start=1&_end=20&from=${from.toISOString()}&to=${to.toISOString()}`;
 
-    return fetchJson(this.url);
+    return fetchJson(url);
   }
 
   remove() {
-    this.element?.remove();
+    if (this.element) {
+      this.element.remove();
+    }
   }
 
   destroy() {
     this.remove();
     this.subElements = {};
     this.element = null;
-    Object.values(this.components).forEach(item => item.destroy());
+    Object.values(this.components).forEach((item) => item.destroy());
     this.components = {};
   }
 }
