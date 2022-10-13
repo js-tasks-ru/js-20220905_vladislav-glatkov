@@ -3,10 +3,10 @@ const header = [
     id: 'images',
     title: 'Image',
     sortable: false,
-    template: data => {
+    template: (data) => {
       return `
           <div class="sortable-table__cell">
-            <img class="sortable-table-image" alt="Image" src="${data[0].url}">
+            <img class="sortable-table-image" alt="Image" src="${data[0]?.url ? data[0].url : '' }">
           </div>
         `;
     }

@@ -88,6 +88,7 @@ describe('async-code-fetch-api-part-1/sortable-table-v3', () => {
 
     const { body } = sortableTable.subElements;
 
+
     expect(body.children.length).toEqual(3);
 
     const [row1, row2, row3] = body.children;
